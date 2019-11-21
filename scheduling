@@ -1,0 +1,59 @@
+input = [(1, 5, 10, 'a'), (2, 6, 20, 'b'), (3, 10, 70, 'c'), (5, 12, 30, 'd'), (7, 15,50, 'e'),
+             (13, 17, 10, 'f'), (15, 20, 30, 'g'), (14, 25, 40, 'h'), (18, 26, 20, 'i')]
+
+intervalToCover = (2,24)
+input = sorted(input, key=lambda tup: tup[1])
+numIntervals = len(input)
+cost = [float('inf')] * (numIntervals)
+p = [0] * numIntervals
+v = [0] * (numIntervals)
+
+for i in range(0,numIntervals):
+    v[i] = input[i][2]
+
+def findOverlap(ith):
+    overlap = []
+    counter = ith-1
+    for k in reversed(range(ith)):
+        if(input[k][1]  >= input[ith][0]):
+            overlap.append(counter)
+            counter = counter - 1
+    return overlap
+
+for i in range(numIntervals):
+    p[i] = findOverlap(i)
+
+
+J = [""]*numIntervals
+
+for x in range (numIntervals):
+    J[x] = str(x)
+
+
+def costMemo(i):
+
+    if(cost[i] != float('inf')):
+        return cost[i],J[i]
+
+    if(i == 0):
+        cost[i] = v[i]
+        return cost[i],J[i]
+    else:
+        minCostOverlap = float('inf')
+        startOfCurrentStudent = input[i][0]
+
+        for x in p[i]:
+            helper = costMemo(x)
+            if(helper[0] < minCostOverlap):
+                minCostOverlap = helper[0]
+                studentWorking = helper[1]
+
+        if(len(p[i]) == 0 or startOfCurrentStudent <= intervalToCover[0] ):
+            minCostOverlap = 0;
+            studentWorking = ""
+
+        J[i] += str(studentWorking)
+        cost[i] = v[i] + minCostOverlap
+        return cost[i],J[i]
+
+print(costMemo(8))
